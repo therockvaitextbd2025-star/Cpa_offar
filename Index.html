@@ -1,1 +1,138 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXiRON Offerwall</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 15px; }
+        .container { width: 95%; max-width: 600px; margin: auto; }
+        #unlock-section { background: white; border-radius: 15px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 50px; }
+        .offer-card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 5px solid #28a745; position: relative; }
+        .offer-card.completed { border-left: 5px solid #999; opacity: 0.5; filter: grayscale(100%); pointer-events: none; }
+        .offer-card img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; margin-right: 15px; }
+        .offer-details { flex-grow: 1; }
+        .offer-details h3 { margin: 0; font-size: 15px; color: #333; }
+        .task-badge { display: inline-block; background: #e9ecef; color: #495057; font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
+        .btn-start { background: #28a745; color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; }
+        .btn-unlock { background: linear-gradient(45deg, #28a745, #218838); color: white; padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; width: 100%; }
+        .no-offer { text-align: center; color: #999; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="unlock-area">
+        <div id="unlock-section">
+            <div style="font-size: 50px;">🔒</div>
+            <h3>Offers are Locked!</h3>
+            <p style="color:#666; font-size:14px; margin-bottom:20px;">
+                Unlock offers for 45 minutes by watching 3 ads. <br>
+                <b id="ad-count-text" style="color: #28a745;">Remaining: 3 ads</b>
+            </p>
+            <button id="unlock-btn" class="btn-unlock" onclick="handleUnlock()">🔓 Watch Ad (1/3)</button>
+        </div>
+    </div>
+
+    <div id="offer-list-area" style="display:none;">
+        <div id="offers-container">
+            <p class="no-offer">Fetching fresh offers...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // আপনার রেন্ডারের engine.php লিঙ্ক এখানে দিন
+    const ENGINE_URL = "https://offers-site.onrender.com/engines.php"; 
+    const userId = new URLSearchParams(window.location.search).get('user_id');
+
+    // ১. অফার লোড করার লজিক (২৪ ঘণ্টা সেভ থাকবে)
+    async function fetchOffers() {
+        if (!userId) return;
+
+        const CACHE_KEY = 'axiron_cache_' + userId;
+        const TIME_KEY = 'axiron_cache_time_' + userId;
+        const currentTime = new Date().getTime();
+
+        const savedData = localStorage.getItem(CACHE_KEY);
+        const savedTime = localStorage.getItem(TIME_KEY);
+
+        // যদি ২৪ ঘণ্টার কম সময় হয়, তবে ফোন থেকেই দেখাবে
+        if (savedData && savedTime && (currentTime - savedTime < 24 * 60 * 60 * 1000)) {
+            renderOffers(JSON.parse(savedData));
+            return;
+        }
+
+        // না থাকলে রেন্ডার থেকে আনবে
+        try {
+            const response = await fetch(`${ENGINE_URL}?user_id=${userId}`);
+            const data = await response.json();
+            
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+            localStorage.setItem(TIME_KEY, currentTime);
+            renderOffers(data);
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById('offers-container').innerHTML = '<p class="no-offer">Error loading offers. Refresh page.</p>';
+        }
+    }
+
+    function renderOffers(offers) {
+        const container = document.getElementById('offers-container');
+        if (!offers || offers.length === 0) {
+            container.innerHTML = '<p class="no-offer">No offers available for your country.</p>';
+            return;
+        }
+
+        let html = '';
+        offers.forEach(o => {
+            html += `
+                <div class="offer-card ${o.is_completed ? 'completed' : ''}">
+                    <img src="${o.image}" onerror="this.src='https://via.placeholder.com/60'">
+                    <div class="offer-details">
+                        <span class="task-badge">${o.task_type || 'Task'}</span>
+                        <h3>${o.title}</h3>
+                        <div style="font-size:12px; color:#666;">Earn: 1 Count</div>
+                    </div>
+                    <a href="${o.link}" target="_blank" class="btn-start">${o.is_completed ? 'Done' : 'Start'}</a>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // ২. আনলক লজিক (৩টি অ্যাড, ৪৫ মিনিট)
+    function checkUnlockStatus() {
+        const unlockTime = localStorage.getItem('axiron_unlock_time');
+        if (unlockTime && (new Date().getTime() - unlockTime < 45 * 60 * 1000)) {
+            document.getElementById('unlock-area').style.display = 'none';
+            document.getElementById('offer-list-area').style.display = 'block';
+            fetchOffers();
+        }
+    }
+    
+    window.onload = checkUnlockStatus;
+
+    function handleUnlock() {
+        let clicks = parseInt(localStorage.getItem('axiron_ad_clicks') || "0");
+        const adLink = "https://acceptancesuicidegel.com/wuaw1fnkac?key=c0aaab542e005284cf06c34fc39bf233";
+        
+        clicks++;
+        if (clicks < 3) {
+            localStorage.setItem('axiron_ad_clicks', clicks);
+            window.open(adLink, '_blank');
+            document.getElementById('ad-count-text').innerText = "Remaining: " + (3 - clicks) + " ads";
+            document.getElementById('unlock-btn').innerText = "🔓 Watch Ad (" + (clicks + 1) + "/3)";
+        } else {
+            window.open(adLink, '_blank');
+            localStorage.setItem('axiron_unlock_time', new Date().getTime());
+            localStorage.removeItem('axiron_ad_clicks');
+            document.getElementById('unlock-area').style.display = 'none';
+            document.getElementById('offer-list-area').style.display = 'block';
+            fetchOffers();
+        }
+    }
+</script>
+
+</body>
+</html>
