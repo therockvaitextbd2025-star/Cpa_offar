@@ -25,7 +25,7 @@ function call_supabase($url) {
 function get_user_country($user_id) {
     $supabaseUrl = getenv('SUPABASE_URL');
     $data = call_supabase("$supabaseUrl/rest/v1/user_data?id=eq.$user_id&select=country_code");
-    return $data[0]['country_code'] ?? 'US';
+    return $data[0]['country_code'] ?? 'null';
 }
 
 function load_offers($user_id) {
