@@ -33,7 +33,7 @@ function load_offers($user_id) {
     $country = get_user_country($user_id);
 
     // ১. সব অফার আনা
-  $offers = call_supabase("$supabaseUrl/rest/v1/all_offers?country_code=ilike.*$country*&device=eq.Android&task_type=not.ilike.*survey*&select=*");
+  $offers = call_supabase("$supabaseUrl/rest/v1/all_offers?country=ilike.*$country*&device=eq.Android&task_type=not.ilike.*survey*&select=*");
 
     // ২. এই ইউজারের কমপ্লিট করা অফারগুলোর আইডি আনা
     $completed_data = call_supabase("$supabaseUrl/rest/v1/postback_logs?user_id=eq.$user_id&select=offer_id");
