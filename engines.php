@@ -5,7 +5,6 @@ header("Access-Control-Allow-Methods: GET, POST");
 header("Access-Control-Allow-Headers: Content-Type");
 header('Content-Type: application/json; charset=utf-8');
 
-// কমন ডাটা রিকোয়েস্ট ফাংশন
 function call_supabase($url) {
     $supabaseKey = getenv('SUPABASE_KEY');
     $ch = curl_init();
@@ -25,17 +24,14 @@ function get_user_country($user_id) {
     $supabaseUrl = getenv('SUPABASE_URL');
     if (empty($user_id)) return null;
 
-    // আইডি দিয়ে কান্ট্রি কোড খোঁজা
+    // এখানে তোর কলামের নাম 'user_id' দিয়ে সেট করে দিলাম
     $url = "$supabaseUrl/rest/v1/user_data?user_id=eq." . trim($user_id) . "&select=country_code";
+    
     $data = call_supabase($url);
 
     if (!empty($data) && isset($data[0]['country_code'])) {
-        $found_country = strtoupper($data[0]['country_code']);
-        header("X-Debug-Found-Country: " . $found_country); // ব্রাউজারের নেটওয়ার্ক ট্যাবে দেখাবে
-        return $found_country;
+        return strtoupper($data[0]['country_code']);
     }
-    
-    header("X-Debug-Found-Country: NOT_IN_DB");
     return null;
 }
 
@@ -43,27 +39,25 @@ function load_offers($user_id) {
     $supabaseUrl = getenv('SUPABASE_URL');
     $country = get_user_country($user_id);
 
-    // যদি কান্ট্রি না পাওয়া যায়, তবে একটি ফেক অফার দেখাবে ডিবাগিং এর জন্য
+    // ইউজার না পাওয়া গেলে এরর মেসেজ
     if (!$country) {
         return [[
-            "title" => "Error: Country not found for ID: " . $user_id,
-            "image" => "https://via.placeholder.com/60/FF0000/FFFFFF?text=ERR",
+            "title" => "Error: No data found for ID: " . $user_id,
+            "image" => "",
             "link" => "#",
-            "task_type" => "SYSTEM",
-            "is_completed" => false
+            "task_type" => "SYSTEM"
         ]];
     }
 
-    // অফার আনা
-    $offers = call_supabase("$supabaseUrl/rest/v1/all_offers?country_code=ilike.*$country*&device=eq.Android&task_type=not.ilike.*survey*&select=*");
+    // কান্ট্রি কোড অনুযায়ী অফার আনা (country_code কলাম ব্যবহার করে)
+    $offers = call_supabase("$supabaseUrl/rest/v1/all_offers?country=ilike.*$country*&device=eq.Android&task_type=not.ilike.*survey*&select=*");
 
     if (empty($offers)) {
         return [[
-            "title" => "No offers found for country: " . $country,
-            "image" => "https://via.placeholder.com/60/CCCCCC/FFFFFF?text=EMPTY",
+            "title" => "No offers available for " . $country,
+            "image" => "",
             "link" => "#",
-            "task_type" => "INFO",
-            "is_completed" => false
+            "task_type" => "INFO"
         ]];
     }
 
@@ -79,21 +73,13 @@ function load_offers($user_id) {
     return $offers;
 }
 
-// মেইন এক্সিকিউশন
 $userId = $_GET['user_id'] ?? '';
 
-// সার্ভার কি আইডি পেয়েছে? সেটা হেডারে পাঠাবে
-header("X-Received-User-ID: " . $userId);
-
 if (empty($userId)) {
-    echo json_encode([[
-        "title" => "Error: No User ID received by Engine",
-        "image" => "",
-        "link" => "#",
-        "task_type" => "ERROR"
-    ]]);
+    echo json_encode([["title" => "Error: User ID missing", "image" => "", "link" => "#"]]);
 } else {
     $finalResult = load_offers($userId);
+    // JSON_UNESCAPED_UNICODE টা খুব জরুরি বাংলা লেখার জন্য
     echo json_encode($finalResult, JSON_UNESCAPED_UNICODE);
 }
 ?>
