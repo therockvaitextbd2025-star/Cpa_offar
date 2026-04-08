@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AXiRON Offerwall</title>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 15px; }
         .container { width: 95%; max-width: 600px; margin: auto; }
@@ -48,7 +50,7 @@
     const userId = new URLSearchParams(window.location.search).get('user_id');
 
     // ১. অফার লোড করার লজিক (২৪ ঘণ্টা সেভ থাকবে)
-    async function fetchOffers() {
+    async function fetchOffers() { alert("User ID is: " + userId);
         if (!userId) return;
 
         const CACHE_KEY = 'axiron_cache_' + userId;
