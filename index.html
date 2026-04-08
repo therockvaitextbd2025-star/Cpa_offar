@@ -58,11 +58,14 @@
         const savedData = localStorage.getItem(CACHE_KEY);
         const savedTime = localStorage.getItem(TIME_KEY);
 
+
+        const COOLDOWN_TIME = 1 * 1000; // 1 second
+
         // যদি ২৪ ঘণ্টার কম সময় হয়, তবে ফোন থেকেই দেখাবে
-        if (savedData && savedTime && (currentTime - savedTime < 24 * 60 * 60 * 1000)) {
-            renderOffers(JSON.parse(savedData));
-            return;
-        }
+       // if (savedData && savedTime && (currentTime - savedTime < 24 * 60 * 60 * 1000)) {
+           // renderOffers(JSON.parse(savedData));
+           // return;
+        //}
 
         // না থাকলে রেন্ডার থেকে আনবে
         try {
