@@ -26,7 +26,7 @@ function get_user_country($user_id) {
     if (empty($user_id)) return null;
 
     // আইডি দিয়ে কান্ট্রি কোড খোঁজা
-    $url = "$supabaseUrl/rest/v1/user_data?id=eq." . trim($user_id) . "&select=country_code";
+    $url = "$supabaseUrl/rest/v1/user_data?user_id=eq." . trim($user_id) . "&select=country_code";
     $data = call_supabase($url);
 
     if (!empty($data) && isset($data[0]['country_code'])) {
