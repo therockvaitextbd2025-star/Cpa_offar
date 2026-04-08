@@ -24,8 +24,38 @@ function call_supabase($url) {
 
 function get_user_country($user_id) {
     $supabaseUrl = getenv('SUPABASE_URL');
-    $data = call_supabase("$supabaseUrl/rest/v1/user_data?id=eq.$user_id&select=country_code");
-    return $data[0]['country_code'] ?? 'us';
+    $supabaseKey = getenv('SUPABASE_KEY');
+    
+    // Search country code from database by user id
+    // using urlencode so id doesn't have problems if there are spaces or something else
+    $url = "$supabaseUrl/rest/v1/user_data?id=eq." . urlencode($user_id) . "&select=country_code";
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "apikey: $supabaseKey", 
+        "Authorization: Bearer $supabaseKey", 
+        "Content-Type: application/json"
+    ]);
+    $response = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
+    
+    if ($err) {
+        return 'BD'; // If there is an error in the connection, the default Bangladesh will be taken
+    }
+
+    $data = json_decode($response, true);
+    
+    // If that user is found in the database
+    if (!empty($data) && isset($data[0]['country_code'])) {
+        // Returns whatever is in the database (ie: BD or US)
+        return $data[0]['country_code']; 
+    }
+    
+    // If the user is not found in the database, only return 'BD'
+    return 'BD'; 
 }
 
 function load_offers($user_id) {
