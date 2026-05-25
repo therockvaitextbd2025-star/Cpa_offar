@@ -1624,7 +1624,7 @@ function viewNotice(notice){
   startAd(null,'notice',()=>showNoticeFinal(notice));
 }
 
-function showNoticeFinal(notice){
+async function showNoticeFinal(notice){
   $('#nmTtl').textContent='📢 '+T('ns');
   $('#nmTxt').textContent=notice.text;
   $('#nmDt').textContent=timeAgo(notice.createdAt);
@@ -2595,7 +2595,7 @@ function buildForgot(){
   </div></div>`;
 }
 
-function attachAuthEvents(){
+async function attachAuthEvents(){
   // Login
   const lgBtn=$('#lgBtn');
   if(lgBtn){
@@ -3663,7 +3663,7 @@ async function loadAdminUsers(c){
   });
 }
 
-function loadAdminNotices(c){
+async function loadAdminNotices(c){
   c.innerHTML=`<div class="card mb12">
     <div class="card-hd">📢 ${T('pn')}</div>
     <textarea class="inp" id="adnTxt" placeholder="${T('an')}" rows="3"></textarea>
@@ -3739,7 +3739,7 @@ async function loadAdminOffers(c){
 }
 
 // ─── ATTACH APP EVENTS ────────────────────────────────
-function attachAppEvents(){
+async function attachAppEvents(){
   // Bottom nav
   $$('.bni[data-page]').forEach(b=>b.onclick=()=>navTo(b.dataset.page));
   // Sidebar toggle
