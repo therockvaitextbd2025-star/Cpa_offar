@@ -151,6 +151,21 @@ select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+x
 
 /* OFFERWALL CARDS */
 .wc{background:#ffffff;border:1.5px solid #dbeafe;border-radius:17px;padding:16px;margin-bottom:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(37,99,235,.05)}
+
+/* ── QUICK SERVICES GRID (Style B) ── */
+.qs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.qs-card{background:#fff;border:1.5px solid #dbeafe;border-radius:18px;padding:14px 8px 12px;text-align:center;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+body.dark .qs-card{background:#1e293b;border-color:#1e3a5f}
+.qs-card:active{transform:scale(.96)}
+.qs-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--qs-shadow,rgba(37,99,235,.15));border-color:var(--qs-bc,#93c5fd)}
+.qs-card-badge{position:absolute;top:-1px;right:8px;font-size:8px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:0 0 8px 8px;text-transform:uppercase}
+.qs-icon-wrap{width:52px;height:52px;border-radius:16px;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--qs-bg,#dbeafe);box-shadow:0 4px 14px var(--qs-shadow,rgba(37,99,235,.15))}
+.qs-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#1e293b;line-height:1.3}
+body.dark .qs-name{color:#f1f5f9}
+.qs-sec-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px}
+.qs-sec-title span{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#1e293b}
+body.dark .qs-sec-title span{color:#f1f5f9}
+.qs-sec-dot{width:5px;height:5px;border-radius:50%;background:#2563eb;flex-shrink:0}
 .wc:hover{transform:translateY(-2px);border-color:#93c5fd;box-shadow:0 6px 20px rgba(37,99,235,.12)}
 .wc-ic{width:50px;height:50px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
 .wc-b{flex:1;min-width:0}
@@ -264,6 +279,8 @@ body.dark .card{background:#1e293b;border-color:#1e3a5f}
 body.dark .inp{background:#0f172a;border-color:#334155;color:#e2e8f0}
 body.dark .arow{background:#1e293b;border-color:#1e3a5f}
 body.dark .wc{background:#1e293b;border-color:#1e3a5f}
+body.dark .qs-card{background:#1e293b;border-color:#1e3a5f}
+body.dark .qs-icon-wrap{filter:brightness(.9)}
 body.dark .bh{background:#1e293b;border-color:#334155;color:#94a3b8}
 body.dark .sdb{background:#0f172a;border-color:#1e3a5f}
 body.dark .nc-item{background:rgba(37,99,235,.08);border-color:#1e3a5f}
@@ -334,6 +351,23 @@ body.dark .streak-day{background:#1e293b;border-color:#1e3a5f}
 .lv-gold{color:#d97706}
 .lv-platinum{color:#2563eb}
 .lv-diamond{color:#7c3aed}
+
+/* ── MONTHLY AWARD ── */
+.award-card{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:16px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
+body.dark .award-card{background:linear-gradient(135deg,#1c1400,#2a1f00);border-color:#b45309}
+.award-card.rank1{background:linear-gradient(135deg,#fffbeb,#fef08a);border-color:#eab308}
+.award-card.rank2{background:linear-gradient(135deg,#f8fafc,#e2e8f0);border-color:#94a3b8}
+.award-card.rank3{background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#f97316}
+.award-badge{position:absolute;top:-8px;right:12px;font-size:32px}
+.award-status-approved{color:#059669;font-weight:700;font-size:12px}
+.award-status-pending{color:#d97706;font-weight:700;font-size:12px}
+.award-status-rejected{color:#dc2626;font-weight:700;font-size:12px}
+
+/* ── COUNTRY BADGE ── */
+.ctry-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,235,.08);border:1px solid #bfdbfe;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;color:#1d4ed8}
+body.dark .ctry-badge{background:rgba(37,99,235,.15);border-color:#1e3a5f;color:#93c5fd}
+.ctry-all{background:rgba(5,150,105,.08);border-color:#a7f3d0;color:#065f46}
+body.dark .ctry-all{background:rgba(5,150,105,.15);border-color:#065f46;color:#6ee7b7}
 </style>
 </head>
 <body>
@@ -550,6 +584,21 @@ const sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
 //   EXECUTE 'CREATE POLICY IF NOT EXISTS auth_policy ON '||t||
 //     ' FOR ALL USING (auth.role() IN (''authenticated'',''service_role''))';
 // END LOOP; END $$;
+//
+// -- 11. MONTHLY_AWARDS TABLE
+// CREATE TABLE IF NOT EXISTS monthly_awards (
+//   id TEXT PRIMARY KEY,
+//   month TEXT,           -- e.g. "2025-01"
+//   uid TEXT,
+//   user_name TEXT,
+//   user_email TEXT,
+//   rank INT,             -- 1, 2, or 3
+//   earned NUMERIC,       -- total earned that month
+//   bonus NUMERIC,        -- award amount
+//   status TEXT DEFAULT 'pending',  -- pending/approved/rejected
+//   created_at BIGINT,
+//   approved_at BIGINT
+// );
 //
 // -- REALTIME চালু করো (Dashboard → Database → Replication → সব table ON)
 // ════════════════════════════════════════════════════════
@@ -1947,6 +1996,8 @@ async function markOfferComplete(uid,wallId,amount){
   });
   await fDB.ref(`users/${uid}/usdEarned`).transaction(v=>(v||0)+parseFloat(amount));
   await fDB.ref(`users/${uid}/offersCompleted`).transaction(v=>(v||0)+1);
+  // Track monthly earnings for award system
+  trackMonthlyEarning(uid, parseFloat(amount)||0);
   toast('Offer marked complete ✓','s');
   render();
 }
@@ -2217,6 +2268,7 @@ function _parsePath(path){
     settings:'settings', stats:'stats',
     postbacks:'postbacks', walls:'walls',
     orders:'orders',
+    monthlyAwards:'monthly_awards',
   };
 
   const rawTable = parts[0];
@@ -2825,13 +2877,32 @@ function buildHome(){
     ${buildBadgesSection(ud)}
   </div>
 
-  <div class="sl">${T('of')}</div>
-  ${CFG.walls.slice(0,3).map(w=>`<div class="wc" data-goto-wall="${w.id}">
-    <div class="wc-ic" style="background:${w.color}22;border:1px solid ${w.color}44">${w.icon}</div>
-    <div class="wc-b"><div class="wc-t">${S.wallData[w.id]?.name||'Offerwall'}</div><div class="wc-d">${S.wallData[w.id]?.desc||''}</div></div>
-    <div class="wc-r"><span style="color:${w.color};font-size:18px">›</span></div>
-  </div>`).join('')}
-  <button class="btn bh mt8" data-page="offers">See All Offers →</button>
+  <!-- QUICK SERVICES GRID -->
+  <div class="qs-sec-title"><div class="qs-sec-dot"></div><span>Quick Services</span></div>
+  <div class="qs-grid">
+    ${CFG.walls.slice(0,5).map((w,i)=>{
+      const colorMap={
+        '#ef4444':{'bg':'#fee2e2','shadow':'rgba(239,68,68,.18)','bc':'#fca5a5'},
+        '#8b5cf6':{'bg':'#ede9fe','shadow':'rgba(139,92,246,.18)','bc':'#c4b5fd'},
+        '#2563eb':{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'},
+        '#f59e0b':{'bg':'#fef3c7','shadow':'rgba(245,158,11,.18)','bc':'#fde68a'},
+        '#10b981':{'bg':'#d1fae5','shadow':'rgba(16,185,129,.18)','bc':'#6ee7b7'},
+        '#ec4899':{'bg':'#fce7f3','shadow':'rgba(236,72,153,.18)','bc':'#f9a8d4'},
+      };
+      const cm=colorMap[w.color]||{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'};
+      return \`<div class="qs-card" data-goto-wall="\${w.id}" style="--qs-bg:\${cm.bg};--qs-shadow:\${cm.shadow};--qs-bc:\${cm.bc}">
+        \${i===0?'<div class="qs-card-badge" style="background:#ef4444;color:#fff">HOT</div>':''}
+        <div class="qs-icon-wrap">\${w.icon}</div>
+        <div class="qs-name">\${S.wallData[w.id]?.name||w.defaultName}</div>
+      </div>\`;
+    }).join('')}
+    <div class="qs-card" data-page="social" style="--qs-bg:#dcfce7;--qs-shadow:rgba(5,150,105,.18);--qs-bc:#6ee7b7">
+      <div class="qs-card-badge" style="background:#059669;color:#fff">EARN</div>
+      <div class="qs-icon-wrap">📋</div>
+      <div class="qs-name">Social Tasks</div>
+    </div>
+  </div>
+  <button class="btn bh mt4 mb12" data-page="offers" style="width:100%">See All Offers →</button>
   ${S.noticeQueue.length>0?`<div class="nc-item mt16" id="homeNotice"><div class="nc-dot"></div><div style="flex:1"><div class="fw6 sm">📢 ${T('nt')}</div></div><button class="btn bp bau bsm">${T('vn')}</button></div>`:''}
   <div class="div mt16"></div>
   <div style="text-align:center;padding:8px 0 20px">
@@ -2920,8 +2991,25 @@ function buildOffers(){
     </div>
     <div style="font-size:36px">💰</div>
   </div>
-  ${walls.map(w=>`<div class="wc" data-goto-wall="${w.id}">
-    <div class="wc-ic" style="background:${w.color}22;border:1px solid ${w.color}44">${w.icon}</div>
+  <div class="qs-grid">
+  ${walls.map(w=>{
+    const colorMap2={
+      '#ef4444':{'bg':'#fee2e2','shadow':'rgba(239,68,68,.18)','bc':'#fca5a5'},
+      '#8b5cf6':{'bg':'#ede9fe','shadow':'rgba(139,92,246,.18)','bc':'#c4b5fd'},
+      '#2563eb':{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'},
+      '#f59e0b':{'bg':'#fef3c7','shadow':'rgba(245,158,11,.18)','bc':'#fde68a'},
+      '#10b981':{'bg':'#d1fae5','shadow':'rgba(16,185,129,.18)','bc':'#6ee7b7'},
+      '#ec4899':{'bg':'#fce7f3','shadow':'rgba(236,72,153,.18)','bc':'#f9a8d4'},
+    };
+    const cm2=colorMap2[w.color]||{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'};
+    return \`<div class="qs-card" data-goto-wall="\${w.id}" style="--qs-bg:\${cm2.bg};--qs-shadow:\${cm2.shadow};--qs-bc:\${cm2.bc}">
+      <div class="qs-icon-wrap">\${w.icon}</div>
+      <div class="qs-name">\${w.name}</div>
+    </div>\`;
+  }).join('')}
+  </div>
+  <!-- hidden wc divs kept for compatibility -->
+  ${walls.map(w=>`<div class="wc" data-goto-wall="${w.id}" style="display:none">
     <div class="wc-b">
       <div class="wc-t">${w.name}</div>
       <div class="wc-d">${w.desc}</div>
@@ -3151,6 +3239,11 @@ function buildProfile(){
     <div class="card-hd mt12">🔥 Login Streak</div>
     ${buildStreakUI(ud)}
   </div>
+  <!-- MY AWARDS -->
+  <div class="card mb12">
+    <div class="card-hd">🏆 My Monthly Awards</div>
+    <div id="userAwardsList"><div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">⏳ Loading…</div></div>
+  </div>
   <div class="sl">${T('yrc')}</div>
   <div class="rbox mb12">
     <div><div class="rc">${ud.refCode||'—'}</div><div class="xs mu mt8">${T('scd')}</div></div>
@@ -3283,9 +3376,14 @@ async function loadSocialTasks(){
       tasks = snap.val()||{};
       EZCache.set('socialTasks', tasks);
     }
+    // ── Country filter ──
+    const filteredEntries = Object.entries(tasks).filter(([,t])=>taskVisibleForUser(t));
+    const filteredTasks = Object.fromEntries(filteredEntries);
+    tasks = filteredTasks;
+
     const list = Object.entries(tasks);
     if(!list.length){
-      el.innerHTML='<div class="card" style="text-align:center;padding:30px"><div style="font-size:32px;margin-bottom:10px">😔</div><div style="font-size:13px;color:#64748b">No tasks available right now.<br>Check back soon!</div></div>';
+      el.innerHTML='<div class="card" style="text-align:center;padding:30px"><div style="font-size:32px;margin-bottom:10px">😔</div><div style="font-size:13px;color:#64748b">No tasks available for your country right now.<br>Check back soon!</div></div>';
       return;
     }
 
@@ -3316,7 +3414,11 @@ async function loadSocialTasks(){
         </div>
         <div style="background:#f8fafc;border-radius:10px;padding:10px;font-size:12px;color:#475569;margin-bottom:10px;line-height:1.6">${t.description}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:11px;color:#94a3b8">Workers: ${t.currentWorkers||0}/${t.maxWorkers||'∞'}</div>
+          <div style="font-size:11px;color:${(t.maxWorkers||0)>0&&(t.currentWorkers||0)>=(t.maxWorkers||0)?'#dc2626':'#94a3b8'};font-weight:${(t.maxWorkers||0)>0&&(t.currentWorkers||0)>=(t.maxWorkers||0)?'700':'400'}">
+            ${(t.maxWorkers||0)>0&&(t.currentWorkers||0)>=(t.maxWorkers||0)
+              ? '🔴 Full ('+t.maxWorkers+'/'+t.maxWorkers+')'
+              : 'Slots: '+(t.currentWorkers||0)+'/'+(t.maxWorkers||'∞')}
+          </div>
           ${isDone?'<div style="font-size:11px;color:#059669;font-weight:600">✅ Already completed</div>':`<a href="${t.link}" target="_blank" style="background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;color:#2563eb;text-decoration:none">Open Link →</a>`}
         </div>
         ${isDone
@@ -3352,6 +3454,24 @@ function submitTaskProof(taskId, taskTitle, reward){
   const email = S.user?.email||'unknown';
   const subId = 'SUB-'+Date.now();
   // Save submission to Supabase
+  // Check maxWorkers — auto disable if full
+  const taskSnap = await fDB.ref('socialTasks/'+taskId).once('value');
+  const taskData = taskSnap.val()||{};
+  const maxW = parseInt(taskData.maxWorkers||0);
+  const curW = parseInt(taskData.currentWorkers||0);
+  if(maxW > 0 && curW >= maxW){
+    toast('This task is full. No more slots available.','w');
+    return;
+  }
+  // Increment currentWorkers
+  await fDB.ref('socialTasks/'+taskId+'/currentWorkers').transaction(v=>(v||0)+1);
+  // Check again after increment — auto disable if now full
+  const newCur = curW + 1;
+  if(maxW > 0 && newCur >= maxW){
+    await fDB.ref('socialTasks/'+taskId+'/status').set('disabled');
+    EZCache.invalidate('socialTasks');
+  }
+
   fDB.ref('submissions/'+subId).set({
     subId, taskId, taskTitle, reward:parseFloat(reward), uid, email,
     status:'pending', createdAt:Date.now()
@@ -3400,8 +3520,8 @@ function buildFAQ(){
 
 // ─── ADMIN PAGE ───────────────────────────────────────
 function buildAdmin(){
-  const tabs=['users','ws','ns','ofs','orders','tasks','sett'];
-  const tabLabels={users:T('us'),ws:T('ws'),ns:T('ns'),ofs:T('ofs'),orders:'🛒 Orders',tasks:'📱 Tasks','sett':'⚙️ Settings'};
+  const tabs=['users','ws','ns','ofs','orders','tasks','awards','sett'];
+  const tabLabels={users:T('us'),ws:T('ws'),ns:T('ns'),ofs:T('ofs'),orders:'🛒 Orders',tasks:'📱 Tasks',awards:'🏆 Awards','sett':'⚙️ Settings'};
   return `<div class="ph"><div class="pt">⚙️ ${T('ap')}</div></div>
   <div class="ats">${tabs.map(t=>`<button class="at-btn${S.adminTab===t?' on':''}" data-atab="${t}">${tabLabels[t]||t}</button>`).join('')}</div>
   <div id="adminContent"><div class="empty"><div class="ein">⏳</div></div></div>`;
@@ -3415,6 +3535,7 @@ async function loadAdminContent(){
   else if(S.adminTab==='ofs') await loadAdminOffers(c);
   else if(S.adminTab==='orders') await loadAdminOrders(c);
   else if(S.adminTab==='tasks') await loadAdminTasks(c);
+  else if(S.adminTab==='awards') await loadAdminAwards(c);
   else if(S.adminTab==='sett') await loadAdminSettings(c);
 }
 
@@ -3476,6 +3597,182 @@ async function loadAdminTasks(c){
       <option value="🔵 Facebook">🔵 Facebook</option>
       <option value="🔴 YouTube">🔴 YouTube</option>
       <option value="💜 Instagram">💜 Instagram</option>
+      <option value="🐦 Twitter/X">🐦 Twitter/X</option>
+      <option value="💬 Telegram">💬 Telegram</option>
+      <option value="📱 TikTok">📱 TikTok</option>
+    </select>
+    <label style="font-size:12px;color:#475569;display:block;margin-bottom:4px;font-weight:600">Target Country (একটি বেছে নাও)</label>
+    <select id="tCountry" style="width:100%;padding:10px 13px;border:1.5px solid #dbeafe;border-radius:10px;font-size:13px;background:#f8fafc;color:#0f172a;outline:none;font-family:inherit;margin-bottom:10px">
+
+      <option value="ALL">🌍 All Countries</option>
+      <option value="AF">🇦🇫 Afghanistan</option>
+      <option value="AL">🇦🇱 Albania</option>
+      <option value="DZ">🇩🇿 Algeria</option>
+      <option value="AD">🇦🇩 Andorra</option>
+      <option value="AO">🇦🇴 Angola</option>
+      <option value="AR">🇦🇷 Argentina</option>
+      <option value="AM">🇦🇲 Armenia</option>
+      <option value="AU">🇦🇺 Australia</option>
+      <option value="AT">🇦🇹 Austria</option>
+      <option value="AZ">🇦🇿 Azerbaijan</option>
+      <option value="BH">🇧🇭 Bahrain</option>
+      <option value="BD">🇧🇩 Bangladesh</option>
+      <option value="BY">🇧🇾 Belarus</option>
+      <option value="BE">🇧🇪 Belgium</option>
+      <option value="BZ">🇧🇿 Belize</option>
+      <option value="BJ">🇧🇯 Benin</option>
+      <option value="BT">🇧🇹 Bhutan</option>
+      <option value="BO">🇧🇴 Bolivia</option>
+      <option value="BA">🇧🇦 Bosnia</option>
+      <option value="BW">🇧🇼 Botswana</option>
+      <option value="BR">🇧🇷 Brazil</option>
+      <option value="BN">🇧🇳 Brunei</option>
+      <option value="BG">🇧🇬 Bulgaria</option>
+      <option value="BF">🇧🇫 Burkina Faso</option>
+      <option value="BI">🇧🇮 Burundi</option>
+      <option value="KH">🇰🇭 Cambodia</option>
+      <option value="CM">🇨🇲 Cameroon</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="CF">🇨🇫 Central African Rep.</option>
+      <option value="TD">🇹🇩 Chad</option>
+      <option value="CL">🇨🇱 Chile</option>
+      <option value="CN">🇨🇳 China</option>
+      <option value="CO">🇨🇴 Colombia</option>
+      <option value="CG">🇨🇬 Congo</option>
+      <option value="CR">🇨🇷 Costa Rica</option>
+      <option value="HR">🇭🇷 Croatia</option>
+      <option value="CU">🇨🇺 Cuba</option>
+      <option value="CY">🇨🇾 Cyprus</option>
+      <option value="CZ">🇨🇿 Czech Republic</option>
+      <option value="DK">🇩🇰 Denmark</option>
+      <option value="DJ">🇩🇯 Djibouti</option>
+      <option value="DO">🇩🇴 Dominican Republic</option>
+      <option value="EC">🇪🇨 Ecuador</option>
+      <option value="EG">🇪🇬 Egypt</option>
+      <option value="SV">🇸🇻 El Salvador</option>
+      <option value="GQ">🇬🇶 Equatorial Guinea</option>
+      <option value="ER">🇪🇷 Eritrea</option>
+      <option value="EE">🇪🇪 Estonia</option>
+      <option value="ET">🇪🇹 Ethiopia</option>
+      <option value="FJ">🇫🇯 Fiji</option>
+      <option value="FI">🇫🇮 Finland</option>
+      <option value="FR">🇫🇷 France</option>
+      <option value="GA">🇬🇦 Gabon</option>
+      <option value="GM">🇬🇲 Gambia</option>
+      <option value="GE">🇬🇪 Georgia</option>
+      <option value="DE">🇩🇪 Germany</option>
+      <option value="GH">🇬🇭 Ghana</option>
+      <option value="GR">🇬🇷 Greece</option>
+      <option value="GT">🇬🇹 Guatemala</option>
+      <option value="GN">🇬🇳 Guinea</option>
+      <option value="GW">🇬🇼 Guinea-Bissau</option>
+      <option value="GY">🇬🇾 Guyana</option>
+      <option value="HT">🇭🇹 Haiti</option>
+      <option value="HN">🇭🇳 Honduras</option>
+      <option value="HK">🇭🇰 Hong Kong</option>
+      <option value="HU">🇭🇺 Hungary</option>
+      <option value="IS">🇮🇸 Iceland</option>
+      <option value="IN">🇮🇳 India</option>
+      <option value="ID">🇮🇩 Indonesia</option>
+      <option value="IR">🇮🇷 Iran</option>
+      <option value="IQ">🇮🇶 Iraq</option>
+      <option value="IE">🇮🇪 Ireland</option>
+      <option value="IL">🇮🇱 Israel</option>
+      <option value="IT">🇮🇹 Italy</option>
+      <option value="JM">🇯🇲 Jamaica</option>
+      <option value="JP">🇯🇵 Japan</option>
+      <option value="JO">🇯🇴 Jordan</option>
+      <option value="KZ">🇰🇿 Kazakhstan</option>
+      <option value="KE">🇰🇪 Kenya</option>
+      <option value="KW">🇰🇼 Kuwait</option>
+      <option value="KG">🇰🇬 Kyrgyzstan</option>
+      <option value="LA">🇱🇦 Laos</option>
+      <option value="LV">🇱🇻 Latvia</option>
+      <option value="LB">🇱🇧 Lebanon</option>
+      <option value="LS">🇱🇸 Lesotho</option>
+      <option value="LR">🇱🇷 Liberia</option>
+      <option value="LY">🇱🇾 Libya</option>
+      <option value="LI">🇱🇮 Liechtenstein</option>
+      <option value="LT">🇱🇹 Lithuania</option>
+      <option value="LU">🇱🇺 Luxembourg</option>
+      <option value="MO">🇲🇴 Macao</option>
+      <option value="MK">🇲🇰 Macedonia</option>
+      <option value="MG">🇲🇬 Madagascar</option>
+      <option value="MW">🇲🇼 Malawi</option>
+      <option value="MY">🇲🇾 Malaysia</option>
+      <option value="MV">🇲🇻 Maldives</option>
+      <option value="ML">🇲🇱 Mali</option>
+      <option value="MT">🇲🇹 Malta</option>
+      <option value="MR">🇲🇷 Mauritania</option>
+      <option value="MU">🇲🇺 Mauritius</option>
+      <option value="MX">🇲🇽 Mexico</option>
+      <option value="MD">🇲🇩 Moldova</option>
+      <option value="MN">🇲🇳 Mongolia</option>
+      <option value="ME">🇲🇪 Montenegro</option>
+      <option value="MA">🇲🇦 Morocco</option>
+      <option value="MZ">🇲🇿 Mozambique</option>
+      <option value="MM">🇲🇲 Myanmar</option>
+      <option value="NA">🇳🇦 Namibia</option>
+      <option value="NP">🇳🇵 Nepal</option>
+      <option value="NL">🇳🇱 Netherlands</option>
+      <option value="NZ">🇳🇿 New Zealand</option>
+      <option value="NI">🇳🇮 Nicaragua</option>
+      <option value="NE">🇳🇪 Niger</option>
+      <option value="NG">🇳🇬 Nigeria</option>
+      <option value="NO">🇳🇴 Norway</option>
+      <option value="OM">🇴🇲 Oman</option>
+      <option value="PK">🇵🇰 Pakistan</option>
+      <option value="PA">🇵🇦 Panama</option>
+      <option value="PG">🇵🇬 Papua New Guinea</option>
+      <option value="PY">🇵🇾 Paraguay</option>
+      <option value="PE">🇵🇪 Peru</option>
+      <option value="PH">🇵🇭 Philippines</option>
+      <option value="PL">🇵🇱 Poland</option>
+      <option value="PT">🇵🇹 Portugal</option>
+      <option value="QA">🇶🇦 Qatar</option>
+      <option value="RO">🇷🇴 Romania</option>
+      <option value="RU">🇷🇺 Russia</option>
+      <option value="RW">🇷🇼 Rwanda</option>
+      <option value="SA">🇸🇦 Saudi Arabia</option>
+      <option value="SN">🇸🇳 Senegal</option>
+      <option value="RS">🇷🇸 Serbia</option>
+      <option value="SL">🇸🇱 Sierra Leone</option>
+      <option value="SG">🇸🇬 Singapore</option>
+      <option value="SK">🇸🇰 Slovakia</option>
+      <option value="SI">🇸🇮 Slovenia</option>
+      <option value="SO">🇸🇴 Somalia</option>
+      <option value="ZA">🇿🇦 South Africa</option>
+      <option value="SS">🇸🇸 South Sudan</option>
+      <option value="ES">🇪🇸 Spain</option>
+      <option value="LK">🇱🇰 Sri Lanka</option>
+      <option value="SD">🇸🇩 Sudan</option>
+      <option value="SR">🇸🇷 Suriname</option>
+      <option value="SZ">🇸🇿 Swaziland</option>
+      <option value="SE">🇸🇪 Sweden</option>
+      <option value="CH">🇨🇭 Switzerland</option>
+      <option value="SY">🇸🇾 Syria</option>
+      <option value="TW">🇹🇼 Taiwan</option>
+      <option value="TJ">🇹🇯 Tajikistan</option>
+      <option value="TZ">🇹🇿 Tanzania</option>
+      <option value="TH">🇹🇭 Thailand</option>
+      <option value="TL">🇹🇱 Timor-Leste</option>
+      <option value="TG">🇹🇬 Togo</option>
+      <option value="TT">🇹🇹 Trinidad and Tobago</option>
+      <option value="TN">🇹🇳 Tunisia</option>
+      <option value="TR">🇹🇷 Turkey</option>
+      <option value="TM">🇹🇲 Turkmenistan</option>
+      <option value="UG">🇺🇬 Uganda</option>
+      <option value="UA">🇺🇦 Ukraine</option>
+      <option value="AE">🇦🇪 UAE</option>
+      <option value="GB">🇬🇧 United Kingdom</option>
+      <option value="US">🇺🇸 United States</option>
+      <option value="UY">🇺🇾 Uruguay</option>
+      <option value="UZ">🇺🇿 Uzbekistan</option>
+      <option value="VE">🇻🇪 Venezuela</option>
+      <option value="VN">🇻🇳 Vietnam</option>
+      <option value="YE">🇾🇪 Yemen</option>
+      <option value="ZM">🇿🇲 Zambia</option>
+      <option value="ZW">🇿🇼 Zimbabwe</option>
     </select>
     <label style="font-size:12px;color:#475569;display:block;margin-bottom:4px;font-weight:600">Task Link *</label>
     <input id="tLink" type="url" placeholder="https://youtube.com/channel/..." style="width:100%;padding:10px 13px;border:1.5px solid #dbeafe;border-radius:10px;font-size:13px;background:#f8fafc;color:#0f172a;outline:none;font-family:inherit;margin-bottom:10px">
@@ -3545,6 +3842,7 @@ async function approveSubmission(subId, uid, reward){
   await fDB.ref('submissions/'+subId+'/status').set('approved');
   await fDB.ref('users/'+uid+'/usdEarned').transaction(v=>(v||0)+parseFloat(reward));
   await fDB.ref('stats/totalEarned').transaction(v=>(v||0)+parseFloat(reward));
+  trackMonthlyEarning(uid, parseFloat(reward)||0);
   const subSnap = await fDB.ref('submissions/'+subId).once('value');
   const taskId = subSnap.val()?.taskId;
   if(taskId){
@@ -3571,11 +3869,13 @@ async function addSocialTask(){
   const maxW=parseInt(document.getElementById('tMax')?.value||100);
   if(!title||!link||!reward){ showToast('Fill all required fields','blue'); return; }
   const id='TASK-'+Date.now();
+  const taskCountry = (document.getElementById('tCountry')?.value||'ALL').trim();
   await fDB.ref('socialTasks/'+id).set({
     id, title, platform, link, description:desc||title,
     reward, maxWorkers:maxW, currentWorkers:0,
     icon: platform.includes('Facebook')?'🔵':platform.includes('YouTube')?'🔴':'💜',
-    status:'active', createdAt:Date.now()
+    status:'active', createdAt:Date.now(),
+    country: taskCountry,
   });
   showToast('✅ Task added!','green');
   loadAdminTasks($('#adminContent'));
@@ -3752,6 +4052,10 @@ async function attachAppEvents(){
   $$('[data-goto-wall]').forEach(el=>{
     el.onclick=()=>openWall(el.dataset.gotoWall);
   });
+  // qs-card social tasks shortcut
+  $$('.qs-card[data-page]').forEach(el=>{
+    el.onclick=()=>{ S.page=el.dataset.page; render(); };
+  });
   // Back buttons
   $$('[data-page]').forEach(btn=>{
     if(!btn.classList.contains('bni')) btn.onclick=()=>navTo(btn.dataset.page);
@@ -3853,6 +4157,8 @@ async function attachAppEvents(){
       toast(T('sv'),'s');
     };
     const lo=$('#prfLo'); if(lo) lo.onclick=doLogout;
+  // Load user awards on profile
+  if(S.user) loadUserAwards(S.user.uid);
   }
   // Notices
   if(S.page==='notices') loadNotices();
@@ -4433,6 +4739,243 @@ function buildStreakUI(ud){
 
 // ── UPDATE HOME PAGE with new features ─────────────────
 // Dark mode toggle in navbar — handled via buildNav update
+
+
+// ════════════════════════════════════════════════════════
+//  COUNTRY-WISE TASKS + MONTHLY AWARD SYSTEM
+// ════════════════════════════════════════════════════════
+
+// ── COUNTRY-WISE TASK FILTER ─────────────────────────
+// task.country = 'ALL' → সবাই দেখবে
+// task.country = 'BD'  → শুধু BD user দেখবে
+// task.country = 'BD,IN,PK' → এই দেশগুলো দেখবে
+function taskVisibleForUser(task){
+  const tc = (task.country||'ALL').toUpperCase().trim();
+  if(tc === 'ALL' || tc === '') return true;
+  const userCC = (S.country||'').toUpperCase();
+  if(!userCC) return true; // country detect না হলে দেখাবে
+  const allowed = tc.split(',').map(x=>x.trim());
+  return allowed.includes(userCC);
+}
+
+// ── MONTHLY AWARD SYSTEM ─────────────────────────────
+
+// Current month string: "2025-01"
+function currentMonth(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+// Get month display name: "January 2025"
+function monthDisplayName(m){
+  if(!m) m = currentMonth();
+  const [y,mo] = m.split('-');
+  const names=['January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  return (names[parseInt(mo)-1]||mo)+' '+y;
+}
+
+// Award amounts for rank 1, 2, 3
+const AWARD_BONUS = {1: 2.00, 2: 1.00, 3: 0.50};
+
+// ── Calculate top 3 earners for a month ──
+// Uses monthEarned_{month} field in users table
+// This field is updated whenever user earns during that month
+async function calcMonthlyTop3(month){
+  month = month || currentMonth();
+  try{
+    const snap = await fDB.ref('users').once('value');
+    const data = snap.val()||{};
+    const field = 'monthEarned_'+month.replace('-','_');
+
+    const earners = Object.values(data)
+      .filter(u => !u.banned && (u[field]||0) >= 10) // min $10
+      .map(u => ({
+        uid: u.uid||u.id,
+        name: u.name||u.email?.split('@')[0]||'User',
+        email: u.email||'',
+        earned: parseFloat(u[field]||0),
+      }))
+      .sort((a,b) => b.earned - a.earned)
+      .slice(0,3);
+
+    return earners;
+  }catch(e){
+    console.warn('calcMonthlyTop3 error:', e);
+    return [];
+  }
+}
+
+// ── Save monthly awards to DB (admin triggers this) ──
+async function generateMonthlyAwards(month){
+  month = month || currentMonth();
+  const top3 = await calcMonthlyTop3(month);
+  if(!top3.length){
+    toast('No eligible users (min $10 earned)','w');
+    return;
+  }
+  for(let i=0; i<top3.length; i++){
+    const u = top3[i];
+    const rank = i+1;
+    const awardId = `award_${month}_rank${rank}`;
+    // Check if already exists
+    const existing = await fDB.ref(`monthlyAwards/${awardId}`).once('value');
+    if(existing.exists()) continue; // already generated
+    await fDB.ref(`monthlyAwards/${awardId}`).set({
+      id: awardId,
+      month, uid: u.uid,
+      userName: u.name,
+      userEmail: u.email,
+      rank, earned: u.earned,
+      bonus: AWARD_BONUS[rank]||0,
+      status: 'pending',
+      createdAt: Date.now(),
+    });
+  }
+  toast(`✅ ${top3.length} award(s) generated for ${monthDisplayName(month)}`,'s');
+  EZCache.invalidate('monthlyAwards');
+  loadAdminAwards(document.getElementById('adminContent'));
+}
+
+// ── Admin approve award ──
+async function approveAward(awardId){
+  const snap = await fDB.ref(`monthlyAwards/${awardId}`).once('value');
+  const award = snap.val();
+  if(!award || award.status !== 'pending'){
+    toast('Award not found or already processed','w'); return;
+  }
+  // Give bonus to user
+  await fDB.ref(`users/${award.uid}/usdEarned`).transaction(v=>(v||0)+award.bonus);
+  // Mark approved
+  await fDB.ref(`monthlyAwards/${awardId}`).update({
+    status:'approved', approvedAt: Date.now()
+  });
+  // Notify user (add to notices)
+  const noticeId = 'notice_award_'+awardId;
+  await fDB.ref(`notices/${noticeId}`).set({
+    text: `🏆 Congratulations! You won Rank #${award.rank} in ${monthDisplayName(award.month)}! +$${award.bonus.toFixed(2)} has been added to your account.`,
+    createdAt: Date.now(),
+    postedBy: S.user?.uid||'admin',
+    targetUid: award.uid,
+  });
+  toast(`✅ Award approved! $${award.bonus} sent to ${award.userName}`,'s');
+  EZCache.invalidate('monthlyAwards');
+  loadAdminAwards(document.getElementById('adminContent'));
+}
+
+// ── Admin reject award ──
+async function rejectAward(awardId){
+  await fDB.ref(`monthlyAwards/${awardId}`).update({status:'rejected'});
+  toast('Award rejected','s');
+  EZCache.invalidate('monthlyAwards');
+  loadAdminAwards(document.getElementById('adminContent'));
+}
+
+// ── Load awards for admin ──
+async function loadAdminAwards(c){
+  if(!c) return;
+  c.innerHTML = '<div class="empty"><div class="ein">⏳</div></div>';
+  const month = currentMonth();
+
+  // Load all awards
+  const snap = await fDB.ref('monthlyAwards').once('value');
+  const data = snap.val()||{};
+  const awards = Object.values(data).sort((a,b)=>b.createdAt-a.createdAt);
+
+  // Load current month top 3 preview
+  const top3 = await calcMonthlyTop3(month);
+
+  const rankMedal = ['🥇','🥈','🥉'];
+
+  c.innerHTML = `
+    <div class="card mb12">
+      <div class="card-hd">📊 ${monthDisplayName(month)} — Current Top 3</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px">Min $10 earned this month to qualify</div>
+      ${top3.length ? top3.map((u,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f8fafc;border-radius:10px;margin-bottom:6px">
+          <div style="font-size:20px">${rankMedal[i]}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:13px">${u.name}</div>
+            <div style="font-size:11px;color:#64748b">${u.email} · Earned: $${u.earned.toFixed(2)}</div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:#059669">+$${(AWARD_BONUS[i+1]||0).toFixed(2)}</div>
+        </div>`).join('')
+      : '<div style="text-align:center;padding:20px;color:#94a3b8">No users with $10+ earned this month</div>'}
+      <button class="btn bp mt12" style="width:100%" onclick="generateMonthlyAwards('${month}')">
+        🏆 Generate ${monthDisplayName(month)} Awards
+      </button>
+    </div>
+
+    <div class="card mb12">
+      <div class="card-hd">📋 All Awards</div>
+      ${awards.length ? awards.map(a=>`
+        <div class="award-card rank${a.rank} mb8">
+          <div class="award-badge">${rankMedal[a.rank-1]||'🏆'}</div>
+          <div style="font-weight:700;font-size:14px">${a.userName}</div>
+          <div style="font-size:12px;color:#64748b;margin:2px 0">${a.userEmail}</div>
+          <div style="font-size:12px;margin:4px 0">
+            📅 ${monthDisplayName(a.month)} · 
+            Rank #${a.rank} · 
+            Earned: <b>$${parseFloat(a.earned).toFixed(2)}</b> · 
+            Bonus: <b style="color:#059669">+$${parseFloat(a.bonus).toFixed(2)}</b>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+            <span class="award-status-${a.status}">${
+              a.status==='approved'?'✅ Approved':
+              a.status==='rejected'?'❌ Rejected':
+              '⏳ Pending'
+            }</span>
+            ${a.status==='pending'?`
+              <div style="display:flex;gap:6px">
+                <button class="btn bp bsm" onclick="approveAward('${a.id}')">✅ Approve</button>
+                <button class="btn bsm" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5" onclick="rejectAward('${a.id}')">❌ Reject</button>
+              </div>`:''}
+          </div>
+        </div>`).join('')
+      : '<div style="text-align:center;padding:20px;color:#94a3b8">No awards yet</div>'}
+    </div>`;
+}
+
+// ── Track monthly earnings ──
+// Call this whenever user earns money
+async function trackMonthlyEarning(uid, amount){
+  const month = currentMonth();
+  const field = 'monthEarned_'+month.replace('-','_');
+  const snap = await fDB.ref(`users/${uid}`).once('value');
+  const ud = snap.val()||{};
+  const current = parseFloat(ud[field]||0);
+  await fDB.ref(`users/${uid}`).update({[field]: current+amount});
+}
+
+// ── User Awards page ──
+async function loadUserAwards(uid){
+  const el = document.getElementById('userAwardsList');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px">⏳ Loading…</div>';
+  const snap = await fDB.ref('monthlyAwards').once('value');
+  const data = snap.val()||{};
+  const myAwards = Object.values(data)
+    .filter(a => a.uid===uid)
+    .sort((a,b)=>b.createdAt-a.createdAt);
+  const rankMedal = ['🥇','🥈','🥉'];
+  if(!myAwards.length){
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">No awards yet. Earn $10+ in a month to qualify!</div>';
+    return;
+  }
+  el.innerHTML = myAwards.map(a=>`
+    <div class="award-card rank${a.rank}">
+      <div class="award-badge">${rankMedal[a.rank-1]||'🏆'}</div>
+      <div style="font-weight:700;font-size:15px">${rankMedal[a.rank-1]} Rank #${a.rank}</div>
+      <div style="font-size:12px;color:#64748b;margin:4px 0">${monthDisplayName(a.month)}</div>
+      <div style="font-size:13px">Earned: <b>$${parseFloat(a.earned).toFixed(2)}</b></div>
+      <div style="font-size:13px;color:#059669;font-weight:700">Bonus: +$${parseFloat(a.bonus).toFixed(2)}</div>
+      <div class="award-status-${a.status}" style="margin-top:6px">${
+        a.status==='approved'?'✅ Paid':
+        a.status==='rejected'?'❌ Rejected':
+        '⏳ Pending approval'
+      }</div>
+    </div>`).join('');
+}
 
 console.log('%c◆ EarnZone Pro v3 — RSS + Custom Payout + Postback', 'color:#2563eb;font-size:14px;font-weight:700');
 </script>
