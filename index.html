@@ -2802,6 +2802,40 @@ function buildSidebar(){
 }
 
 // ─── HOME PAGE ────────────────────────────────────────
+
+// ── QS Card helper functions (template-in-template fix) ──
+const QS_COLOR_MAP = {
+  '#ef4444':{bg:'#fee2e2',shadow:'rgba(239,68,68,.18)',bc:'#fca5a5'},
+  '#8b5cf6':{bg:'#ede9fe',shadow:'rgba(139,92,246,.18)',bc:'#c4b5fd'},
+  '#2563eb':{bg:'#dbeafe',shadow:'rgba(37,99,235,.18)',bc:'#93c5fd'},
+  '#f59e0b':{bg:'#fef3c7',shadow:'rgba(245,158,11,.18)',bc:'#fde68a'},
+  '#10b981':{bg:'#d1fae5',shadow:'rgba(16,185,129,.18)',bc:'#6ee7b7'},
+  '#ec4899':{bg:'#fce7f3',shadow:'rgba(236,72,153,.18)',bc:'#f9a8d4'},
+};
+
+function buildQsCards(){
+  return CFG.walls.slice(0,5).map((w,i)=>{
+    const cm = QS_COLOR_MAP[w.color]||{bg:'#dbeafe',shadow:'rgba(37,99,235,.18)',bc:'#93c5fd'};
+    const badge = i===0 ? '<div class="qs-card-badge" style="background:#ef4444;color:#fff">HOT</div>' : '';
+    const name = (S.wallData[w.id]?.name||w.defaultName||'Offerwall');
+    return '<div class="qs-card" data-goto-wall="'+w.id+'" style="--qs-bg:'+cm.bg+';--qs-shadow:'+cm.shadow+';--qs-bc:'+cm.bc+'">'+
+      badge+
+      '<div class="qs-icon-wrap">'+w.icon+'</div>'+
+      '<div class="qs-name">'+name+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function buildQsCardsAll(walls){
+  return (walls||[]).map((w)=>{
+    const cm = QS_COLOR_MAP[w.color]||{bg:'#dbeafe',shadow:'rgba(37,99,235,.18)',bc:'#93c5fd'};
+    return '<div class="qs-card" data-goto-wall="'+w.id+'" style="--qs-bg:'+cm.bg+';--qs-shadow:'+cm.shadow+';--qs-bc:'+cm.bc+'">'+
+      '<div class="qs-icon-wrap">'+w.icon+'</div>'+
+      '<div class="qs-name">'+w.name+'</div>'+
+    '</div>';
+  }).join('');
+}
+
 function buildHome(){
   const ud=S.userData||{};
   const today=new Date().toDateString();
@@ -2880,22 +2914,7 @@ function buildHome(){
   <!-- QUICK SERVICES GRID -->
   <div class="qs-sec-title"><div class="qs-sec-dot"></div><span>Quick Services</span></div>
   <div class="qs-grid">
-    ${CFG.walls.slice(0,5).map((w,i)=>{
-      const colorMap={
-        '#ef4444':{'bg':'#fee2e2','shadow':'rgba(239,68,68,.18)','bc':'#fca5a5'},
-        '#8b5cf6':{'bg':'#ede9fe','shadow':'rgba(139,92,246,.18)','bc':'#c4b5fd'},
-        '#2563eb':{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'},
-        '#f59e0b':{'bg':'#fef3c7','shadow':'rgba(245,158,11,.18)','bc':'#fde68a'},
-        '#10b981':{'bg':'#d1fae5','shadow':'rgba(16,185,129,.18)','bc':'#6ee7b7'},
-        '#ec4899':{'bg':'#fce7f3','shadow':'rgba(236,72,153,.18)','bc':'#f9a8d4'},
-      };
-      const cm=colorMap[w.color]||{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'};
-      return \`<div class="qs-card" data-goto-wall="\${w.id}" style="--qs-bg:\${cm.bg};--qs-shadow:\${cm.shadow};--qs-bc:\${cm.bc}">
-        \${i===0?'<div class="qs-card-badge" style="background:#ef4444;color:#fff">HOT</div>':''}
-        <div class="qs-icon-wrap">\${w.icon}</div>
-        <div class="qs-name">\${S.wallData[w.id]?.name||w.defaultName}</div>
-      </div>\`;
-    }).join('')}
+    ${buildQsCards()}
     <div class="qs-card" data-page="social" style="--qs-bg:#dcfce7;--qs-shadow:rgba(5,150,105,.18);--qs-bc:#6ee7b7">
       <div class="qs-card-badge" style="background:#059669;color:#fff">EARN</div>
       <div class="qs-icon-wrap">📋</div>
@@ -2992,21 +3011,7 @@ function buildOffers(){
     <div style="font-size:36px">💰</div>
   </div>
   <div class="qs-grid">
-  ${walls.map(w=>{
-    const colorMap2={
-      '#ef4444':{'bg':'#fee2e2','shadow':'rgba(239,68,68,.18)','bc':'#fca5a5'},
-      '#8b5cf6':{'bg':'#ede9fe','shadow':'rgba(139,92,246,.18)','bc':'#c4b5fd'},
-      '#2563eb':{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'},
-      '#f59e0b':{'bg':'#fef3c7','shadow':'rgba(245,158,11,.18)','bc':'#fde68a'},
-      '#10b981':{'bg':'#d1fae5','shadow':'rgba(16,185,129,.18)','bc':'#6ee7b7'},
-      '#ec4899':{'bg':'#fce7f3','shadow':'rgba(236,72,153,.18)','bc':'#f9a8d4'},
-    };
-    const cm2=colorMap2[w.color]||{'bg':'#dbeafe','shadow':'rgba(37,99,235,.18)','bc':'#93c5fd'};
-    return \`<div class="qs-card" data-goto-wall="\${w.id}" style="--qs-bg:\${cm2.bg};--qs-shadow:\${cm2.shadow};--qs-bc:\${cm2.bc}">
-      <div class="qs-icon-wrap">\${w.icon}</div>
-      <div class="qs-name">\${w.name}</div>
-    </div>\`;
-  }).join('')}
+    ${buildQsCardsAll(walls)}
   </div>
   <!-- hidden wc divs kept for compatibility -->
   ${walls.map(w=>`<div class="wc" data-goto-wall="${w.id}" style="display:none">
