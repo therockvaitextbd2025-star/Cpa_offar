@@ -467,8 +467,8 @@ body.dark .ctry-all{background:rgba(5,150,105,.15);border-color:#065f46;color:#6
 
 // ─── SUPABASE INIT ──────────────────────────────────────
 // ── SUPABASE CONFIG ── বসাও তোমার Project URL ও anon key ──
-const SUPA_URL = 'https://YOUR_PROJECT.supabase.co';   // ← তোমার Supabase URL
-const SUPA_KEY = 'YOUR_ANON_KEY';                       // ← তোমার anon/public key
+const SUPA_URL = 'https://oazyvgjixljdnjhorasa.supabase.co';   // ← তোমার Supabase URL
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9henl2Z2ppeGxqZG5qaG9yYXNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NTU2MTAsImV4cCI6MjA5NTUzMTYxMH0.n0iFz71OI0MeFc-ZWgliBDzuhxO-LE0qBIviO4ZhZsU';                       // ← তোমার anon/public key
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
   auth: { persistSession: true, autoRefreshToken: true }
 });
