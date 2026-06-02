@@ -183,6 +183,9 @@ body.dark .qs-sec-title span{color:#f1f5f9}
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .mb2{padding:10px 12px;border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif;border:1.5px solid #cbd5e1;background:#f8fafc;color:#475569;text-align:left;display:flex;align-items:center;gap:8px}
 .mb2.sel{border-color:#2563eb;background:rgba(37,99,235,.08);color:#1e40af}
+.method-logo-wrap{display:flex;align-items:center;flex-shrink:0}
+.method-logo-wrap svg{border-radius:3px;display:block}
+.method-name-txt{font-size:11px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ADMIN TABS */
 .ats{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
@@ -484,22 +487,31 @@ const sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
 // ════════════════════════════════════════════════════════
 //
 // -- 1. USERS TABLE
+// -- IMPORTANT: id = Supabase Auth user UUID (PRIMARY KEY)
 // CREATE TABLE IF NOT EXISTS users (
-//   id TEXT PRIMARY KEY,
-//   email TEXT, name TEXT, ref_code TEXT,
-//   referred_by TEXT, lang TEXT DEFAULT 'en',
-//   country TEXT, country_earn NUMERIC DEFAULT 0.30,
+//   id TEXT PRIMARY KEY,        -- ← Supabase Auth UID এটাই
+//   uid TEXT,                   -- backward compat (id এর সমান)
+//   email TEXT,
+//   name TEXT,
+//   ref_code TEXT,
+//   referred_by TEXT,
+//   lang TEXT DEFAULT 'en',
+//   country TEXT DEFAULT '',
+//   country_earn NUMERIC DEFAULT 0.30,
 //   usd_earned NUMERIC DEFAULT 0,
 //   today_earned NUMERIC DEFAULT 0,
-//   today_date TEXT, ads_watched INT DEFAULT 0,
+//   today_date TEXT DEFAULT '',
+//   ads_watched INT DEFAULT 0,
 //   offers_completed INT DEFAULT 0,
 //   active_referrals INT DEFAULT 0,
 //   is_admin BOOLEAN DEFAULT false,
 //   banned BOOLEAN DEFAULT false,
 //   forgot_used BOOLEAN DEFAULT false,
-//   device_id TEXT, email_verified BOOLEAN DEFAULT false,
+//   device_id TEXT DEFAULT '',
+//   email_verified BOOLEAN DEFAULT false,
 //   login_streak INT DEFAULT 0,
-//   last_login_date TEXT, daily_bonus_date TEXT,
+//   last_login_date TEXT DEFAULT '',
+//   daily_bonus_date TEXT DEFAULT '',
 //   wall_progress JSONB DEFAULT '{}',
 //   read_notices JSONB DEFAULT '{}',
 //   completed_tasks JSONB DEFAULT '{}',
@@ -612,7 +624,26 @@ const CFG = {
   earnHi:.50, earnDef:.30,
   hiCC:['US','GB','CA','AU','DE','FR','NL','SE','NO','DK','CH','AT','SG','JP','NZ','IE'],
   methods:['bkash','nagad','paypal','visa','payoneer','usdt','opay','binance'],
-  methodEmoji:{bkash:'🇧🇩 bKash',nagad:'💚 Nagad',paypal:'💳 PayPal',visa:'🔵 Visa Card',payoneer:'🏦 Payoneer',usdt:'💎 USDT',opay:'🇳🇬 OPay',binance:'🟡 Binance'},
+  methodEmoji:{
+    bkash:'bKash',
+    nagad:'Nagad',
+    paypal:'PayPal',
+    visa:'Visa Card',
+    payoneer:'Payoneer',
+    usdt:'USDT (TRC20)',
+    opay:'OPay',
+    binance:'Binance Pay'
+  },
+  methodLogo:{
+    bkash:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#E2136E"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#fff">bKash</text></svg>`,
+    nagad:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#F15A29"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#fff">Nagad</text></svg>`,
+    paypal:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#003087"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#fff">PayPal</text></svg>`,
+    visa:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#1A1F71"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="13" fill="#F7B600" letter-spacing="1">VISA</text></svg>`,
+    payoneer:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#FF4800"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="10" fill="#fff">Payoneer</text></svg>`,
+    usdt:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#26A17B"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#fff">USDT</text></svg>`,
+    opay:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#00C853"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#fff">OPay</text></svg>`,
+    binance:`<svg viewBox="0 0 80 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="20"><rect width="80" height="24" rx="4" fill="#F0B90B"/><text x="40" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="10" fill="#000">Binance Pay</text></svg>`,
+  },
   // ── OFFERWALL CONFIG — এখানে link বসাও, admin panel লাগবে না ──
   walls:[
     {
@@ -1629,41 +1660,62 @@ async function processPostbacks(){
   if(!S.user) return;
   const uid=S.user.uid;
   try{
-    const snap=await fDB.ref(`postbacks/${uid}`).once('value');
-    const data=snap.val()||{};
-    for(const [key,val] of Object.entries(data)){
-      if(val && !val.processed && val.amount){
-        const cpaAmt=parseFloat(val.amount)||0;
-        const userAmt=getUserPayout(cpaAmt); // Admin set amount দেবে
-        const wallId=val.wallId||'w1';
-        const offerId=val.offer_id||key;
-        // Check duplicate
-        const dupSnap=await fDB.ref(`offers/${uid}/${encKey(offerId)}`).once('value');
-        if(dupSnap.exists()){ await fDB.ref(`postbacks/${uid}/${key}/processed`).set(true); continue; }
-        // Save offer
-        await fDB.ref(`offers/${uid}/${encKey(offerId)}`).set({
-          id:offerId, wallId, cpaAmount:cpaAmt,
-          userAmount:userAmt, completedAt:Date.now(), verified:true,
-        });
-        // Add user earning
-        await fDB.ref(`users/${uid}/usdEarned`).transaction(v=>(v||0)+userAmt);
-        await fDB.ref(`users/${uid}/offersCompleted`).transaction(v=>(v||0)+1);
-        // Atomic counter — global total earned
-        await fDB.ref('stats/totalEarned').transaction(v=>(v||0)+userAmt);
-        // Today's earning
-        const today=new Date().toDateString();
-        const todaySnap=await fDB.ref(`users/${uid}/todayDate`).once('value');
-        if(todaySnap.val()!==today){
-          await fDB.ref(`users/${uid}/todayDate`).set(today);
-          await fDB.ref(`users/${uid}/todayEarned`).set(userAmt);
-        } else {
-          await fDB.ref(`users/${uid}/todayEarned`).transaction(v=>(v||0)+userAmt);
-        }
-        await fDB.ref(`postbacks/${uid}/${key}/processed`).set(true);
-        toast(`✅ Offer completed! +$${userAmt.toFixed(2)}`,'s');
+    // সরাসরি Supabase — uid দিয়ে unprocessed postbacks fetch
+    const {data:pbs} = await sb.from('postbacks')
+      .select('*').eq('uid', uid).eq('processed', false);
+    if(!pbs || !pbs.length) return;
+
+    for(const val of pbs){
+      if(!val.amount) continue;
+      const cpaAmt  = parseFloat(val.amount)||0;
+      const userAmt = getUserPayout(cpaAmt);
+      const wallId  = val.wall_id || val.wallId || 'w1';
+      const offerId = val.offer_id || val.id;
+
+      // Duplicate check — সরাসরি Supabase
+      const {data:dup} = await sb.from('offers')
+        .select('id').eq('uid', uid).eq('offer_id', offerId).maybeSingle();
+      if(dup){
+        await sb.from('postbacks').update({processed:true}).eq('id', val.id);
+        continue;
       }
+
+      // Offer save — সরাসরি Supabase
+      const newOid = crypto.randomUUID ? crypto.randomUUID() : ('off_'+Date.now());
+      await sb.from('offers').upsert({
+        id:newOid, uid, wall_id:wallId, offer_id:offerId,
+        amount:userAmt, completed_at:Date.now(), verified:true,
+      }, {onConflict:'id'});
+
+      // User earning update
+      await fDB.ref(`users/${uid}/usdEarned`).transaction(v=>(v||0)+userAmt);
+      await fDB.ref(`users/${uid}/offersCompleted`).transaction(v=>(v||0)+1);
+
+      // Stats total_earned — সরাসরি Supabase
+      const {data:st} = await sb.from('stats').select('total_earned').eq('id','stats').maybeSingle();
+      await sb.from('stats').upsert({
+        id:'stats', total_earned:(parseFloat(st?.total_earned)||0)+userAmt
+      },{onConflict:'id'});
+
+      // Today earning
+      const today=new Date().toDateString();
+      const todaySnap=await fDB.ref(`users/${uid}/todayDate`).once('value');
+      if(todaySnap.val()!==today){
+        await fDB.ref(`users/${uid}/todayDate`).set(today);
+        await fDB.ref(`users/${uid}/todayEarned`).set(userAmt);
+      } else {
+        await fDB.ref(`users/${uid}/todayEarned`).transaction(v=>(v||0)+userAmt);
+      }
+
+      // Mark processed — সরাসরি Supabase
+      await sb.from('postbacks').update({processed:true}).eq('id', val.id);
+
+      // Monthly tracking
+      trackMonthlyEarning(uid, userAmt);
+
+      toast(`✅ Offer completed! +$${userAmt.toFixed(2)}`,'s');
     }
-  }catch(e){ console.log('Postback check error:',e); }
+  }catch(e){ /* postback check error — silent in production */ }
 }
 
 // ─── NOTICE AD GATE ───────────────────────────────────
@@ -1752,23 +1804,26 @@ function _userFromDB(row){
   if(!row) return null;
   return {
     ...row,
-    usdEarned: row.usd_earned ?? row.usdEarned ?? 0,
-    todayEarned: row.today_earned ?? row.todayEarned ?? 0,
+    // id is the Supabase primary key — also expose as uid for app compatibility
+    uid: row.id ?? row.uid ?? null,
+    id: row.id ?? row.uid ?? null,
+    usdEarned: parseFloat(row.usd_earned ?? row.usdEarned ?? 0),
+    todayEarned: parseFloat(row.today_earned ?? row.todayEarned ?? 0),
     todayDate: row.today_date ?? row.todayDate ?? '',
-    adsWatched: row.ads_watched ?? row.adsWatched ?? 0,
-    offersCompleted: row.offers_completed ?? row.offersCompleted ?? 0,
-    activeReferrals: row.active_referrals ?? row.activeReferrals ?? 0,
+    adsWatched: parseInt(row.ads_watched ?? row.adsWatched ?? 0),
+    offersCompleted: parseInt(row.offers_completed ?? row.offersCompleted ?? 0),
+    activeReferrals: parseInt(row.active_referrals ?? row.activeReferrals ?? 0),
     isAdmin: row.is_admin ?? row.isAdmin ?? false,
     emailVerified: row.email_verified ?? row.emailVerified ?? false,
     refCode: row.ref_code ?? row.refCode ?? '',
     referredBy: row.referred_by ?? row.referredBy ?? null,
     forgotUsed: row.forgot_used ?? row.forgotUsed ?? false,
-    countryEarn: row.country_earn ?? row.countryEarn ?? 0.30,
+    countryEarn: parseFloat(row.country_earn ?? row.countryEarn ?? 0.30),
     deviceId: row.device_id ?? row.deviceId ?? '',
-    loginStreak: row.login_streak ?? row.loginStreak ?? 0,
+    loginStreak: parseInt(row.login_streak ?? row.loginStreak ?? 0),
     lastLoginDate: row.last_login_date ?? row.lastLoginDate ?? '',
     dailyBonusDate: row.daily_bonus_date ?? row.dailyBonusDate ?? '',
-    socialUnlockAt: row.social_unlock_at ?? row.socialUnlockAt ?? 0,
+    socialUnlockAt: parseInt(row.social_unlock_at ?? row.socialUnlockAt ?? 0),
     wallProgress: row.wall_progress ?? row.wallProgress ?? {},
     readNotices: row.read_notices ?? row.readNotices ?? {},
     completedTasks: row.completed_tasks ?? row.completedTasks ?? {},
@@ -1790,11 +1845,17 @@ function _userToDB(data){
     socialUnlockAt:'social_unlock_at', wallProgress:'wall_progress',
     readNotices:'read_notices', completedTasks:'completed_tasks',
     createdAt:'created_at',
+    // uid → id (Supabase primary key)
+    uid:'id',
   };
   const result = {};
   for(const [k,v] of Object.entries(data)){
-    result[m[k]||k] = v;
+    const mapped = m[k]||k;
+    result[mapped] = v;
   }
+  // Ensure id is always set — uid and id must be same
+  if(result.uid && !result.id) result.id = result.uid;
+  if(result.id && !result.uid) result.uid = result.id;
   return result;
 }
 
@@ -1840,7 +1901,8 @@ function msToHM(ms){
 
 // POSTBACK URL for user
 function getPostbackUrl(uid,wallId){
-  // Supabase postback: use Edge Function or direct DB write
+  // ── তোমার আলাদা postback server থাকলে নিচের URL বদলে দাও ──
+  // return `https://তোমার-postback-server.com/postback.php?uid=${uid}&wall=${wallId}&secret=তোমার_গোপন_কোড`;
   return `${SUPA_URL}/functions/v1/postback?uid=${uid}&wall=${wallId}`;
 }
 // Postback note to show users
@@ -1852,7 +1914,7 @@ function getPostbackNote(uid,wallId){
 async function doRegister(name,email,pw,refCode){
   // Device check
   const devId=getDeviceId();
-  const usersSnap=await fDB.ref('users').orderByChild('deviceId').equalTo(devId).once('value');
+  const usersSnap=await fDB.ref('users').orderByChild('device_id').equalTo(devId).once('value');
   const devUsers=usersSnap.val()||{};
   if(Object.keys(devUsers).length>=CFG.maxDevAcc){
     toast(T('mx'),'e'); return;
@@ -1860,7 +1922,7 @@ async function doRegister(name,email,pw,refCode){
   // Ref code validation
   let refByUid=null;
   if(refCode){
-    const snap=await fDB.ref('users').orderByChild('refCode').equalTo(refCode.toUpperCase()).once('value');
+    const snap=await fDB.ref('users').orderByChild('ref_code').equalTo(refCode.toUpperCase()).once('value');
     const found=snap.val();
     if(!found){ toast(T('rnf'),'e'); return; }
     refByUid=Object.keys(found)[0];
@@ -1868,32 +1930,64 @@ async function doRegister(name,email,pw,refCode){
   }
   try{
     const cred=await fAuth.createUserWithEmailAndPassword(email,pw);
-    const uid=cred.user.uid;
+    const uid=cred.user.id || cred.user.uid;
     await cred.user.sendEmailVerification();
     const code=genRef();
+    // ── id field MUST be the Supabase Auth UID ──
+    // সব field snake_case এ — Supabase users table এর সাথে exact match
     const userData={
-      name:name||email.split('@')[0], email, uid, createdAt:Date.now(),
-      refCode:code, referredBy:refByUid||null,
-      lang:S.lang, country:S.country, countryEarn:S.countryEarn,
-      coins:0, usdEarned:0, todayEarned:0, todayDate:new Date().toDateString(),
-      adsWatched:0, offersCompleted:0, activeReferrals:0,
-      isAdmin:false, banned:false, forgotUsed:false,
-      deviceId:devId, emailVerified:false,
+      id: uid,          // ← PRIMARY KEY — এটাই সবচেয়ে গুরুত্বপূর্ণ ছিল
+      uid: uid,         // backward compat
+      name: name||email.split('@')[0],
+      email: email,
+      ref_code: code,
+      referred_by: refByUid||null,
+      lang: S.lang,
+      country: S.country||'',
+      country_earn: S.countryEarn||0.30,
+      usd_earned: 0,
+      today_earned: 0,
+      today_date: new Date().toDateString(),
+      ads_watched: 0,
+      offers_completed: 0,
+      active_referrals: 0,
+      is_admin: false,
+      banned: false,
+      forgot_used: false,
+      device_id: devId,
+      email_verified: false,
+      login_streak: 0,
+      last_login_date: '',
+      daily_bonus_date: '',
+      wall_progress: {},
+      read_notices: {},
+      completed_tasks: {},
+      social_unlock_at: 0,
+      created_at: new Date().toISOString(),
     };
-    await fDB.ref(`users/${uid}`).set(userData);
-    // Atomic counter — total users +1
-    await fDB.ref('stats/totalUsers').transaction(v=>(v||0)+1);
-    // Add referral
-    if(refByUid){
-      //await fDB.ref(`users/${refByUid}/pendingReferrals/${uid}`).set(Date.now());
-      await fDB.ref(`users/${refByUid}/usdEarned`)
-  .transaction(v => (v||0) + CFG.refBonus);
+    // Direct Supabase insert — fDB wrapper bypass করে সরাসরি
+    const {error: insertErr} = await sb.from('users').upsert(userData, {onConflict:'id'});
+    if(insertErr){
+      console.error('User insert error:', insertErr);
+      toast(insertErr.message,'e'); return;
     }
+    // Atomic counter — total users +1
+    const statsSnap = await sb.from('stats').select('total_users').eq('id','stats').maybeSingle();
+    const curTotal = statsSnap.data?.total_users||0;
+    await sb.from('stats').upsert({id:'stats', total_users: curTotal+1}, {onConflict:'id'});
+    // Referral bonus
+    if(refByUid){
+      const refSnap = await sb.from('users').select('usd_earned').eq('id',refByUid).maybeSingle();
+      const curEarned = parseFloat(refSnap.data?.usd_earned||0);
+      await sb.from('users').update({usd_earned: curEarned + CFG.refBonus, active_referrals: (refSnap.data?.active_referrals||0)+1}).eq('id',refByUid);
+    }
+    EZCache.invalidateAll();
     toast(T('rs'),'s');
     S.page='verify';
     render();
   }catch(e){
-    toast(e.message,'e');
+    console.error('Register error:', e);
+    toast(e.message||'Registration failed','e');
   }
 }
 
@@ -1957,12 +2051,11 @@ async function submitWithdraw(method,account,amount){
   if((ud.usdEarned||0)<usd){
     toast(T('wf'),'e'); return;
   }
-  const wPush=fDB.ref('withdrawals').push();
-  const wid=wPush.key;
+  const wid = crypto.randomUUID ? crypto.randomUUID() : ('wd_'+Date.now()+'_'+Math.random().toString(36).slice(2,8));
   await fDB.ref(`withdrawals/${wid}`).set({
-    id:wid, uid:S.user.uid, userEmail:ud.email, userName:ud.name,
+    id:wid, uid:S.user.uid, user_email:ud.email, user_name:ud.name,
     method, account, amount:usd, status:'pending',
-    createdAt:Date.now(),
+    created_at:Date.now(),
   });
   // Deduct from user
   await fDB.ref(`users/${S.user.uid}/usdEarned`).transaction(v=>Math.max(0,(v||0)-usd));
@@ -1988,11 +2081,11 @@ async function submitWithdraw(method,account,amount){
 
 // ─── OFFER COMPLETE (postback / manual) ───────────────
 async function markOfferComplete(uid,wallId,amount){
-  const oPush=fDB.ref(`offers/${uid}`).push();
-  const oid=oPush.key;
-  await fDB.ref(`offers/${uid}/${oid}`).set({
-    id:oid,wallId,amount:parseFloat(amount)||0.30,
-    completedAt:Date.now(),verified:true,
+  const oid = crypto.randomUUID ? crypto.randomUUID() : ('off_'+Date.now()+'_'+Math.random().toString(36).slice(2,8));
+  await fDB.ref(`offers/${oid}`).set({
+    id:oid, uid, wall_id:wallId,
+    amount:parseFloat(amount)||0.30,
+    completed_at:Date.now(), verified:true,
   });
   await fDB.ref(`users/${uid}/usdEarned`).transaction(v=>(v||0)+parseFloat(amount));
   await fDB.ref(`users/${uid}/offersCompleted`).transaction(v=>(v||0)+1);
@@ -2153,7 +2246,12 @@ class SBRef {
       const {data} = await sb.from(table).select('*');
       if(data && data.length){
         value = {};
-        for(const row of data) value[row.id] = row;
+        for(const row of data){
+          // Map users rows to camelCase
+          const mapped = table==='users' ? _userFromDB(row) : row;
+          const key = mapped.id || mapped.uid || row.id;
+          value[key] = mapped;
+        }
       }
     }
 
@@ -2209,21 +2307,35 @@ class SBQuery {
   limitToFirst(n){ this._limitFirst=n; return this; }
   startAt(v){ return this; }
 
+  // Map camelCase column names to snake_case for Supabase queries
+  _colMap(col){
+    const m={
+      deviceId:'device_id', refCode:'ref_code', referredBy:'referred_by',
+      usdEarned:'usd_earned', adsWatched:'ads_watched', isAdmin:'is_admin',
+      createdAt:'created_at', emailVerified:'email_verified',
+      offersCompleted:'offers_completed', activeReferrals:'active_referrals',
+      loginStreak:'login_streak', socialUnlockAt:'social_unlock_at',
+      uid:'id',
+    };
+    return m[col]||col;
+  }
+
   async once(event){
     const {table} = _parsePath(this.path);
     if(!table) return _snap(null, this.path);
 
     let query = sb.from(table).select('*');
 
-    // Filter by column value
-    if(this._eq !== null && this.opts.orderBy && this.opts.orderBy !== '__value'){
-      query = query.eq(this.opts.orderBy, this._eq);
+    // Filter by column value — map camelCase to snake_case
+    const col = this._colMap(this.opts.orderBy||'');
+    if(this._eq !== null && col && col !== '__value'){
+      query = query.eq(col, this._eq);
     }
 
     // Order
-    if(this.opts.orderBy && this.opts.orderBy !== '__value'){
-      const asc = !this._limit; // limitToLast → desc then reverse
-      query = query.order(this.opts.orderBy, {ascending: asc});
+    if(col && col !== '__value'){
+      const asc = !this._limit;
+      query = query.order(col, {ascending: asc});
     }
 
     // Limit
@@ -2239,7 +2351,11 @@ class SBQuery {
     const rows = this._limit ? [...data].reverse() : data;
 
     const obj = {};
-    for(const row of rows) obj[row.id] = row;
+    for(const row of rows){
+      // For users table, map back to camelCase
+      const mapped = table==='users' ? _userFromDB(row) : row;
+      obj[mapped.id||mapped.uid||row.id] = mapped;
+    }
 
     return _snap(obj, this.path);
   }
@@ -2315,9 +2431,17 @@ async function _getRow(table, id){
 async function _upsert(table, id, value){
   let row = typeof value === 'object' ? {...value, id} : {id, value};
   // Convert camelCase to snake_case for users table
-  if(table === 'users') row = _userToDB(row);
+  if(table === 'users'){
+    row = _userToDB(row);
+    // Ensure id is always the Supabase Auth UID (not lost in conversion)
+    if(id) row.id = id;
+    // Remove uid duplicate — id is the primary key
+    // keep uid field for backward compat but id must exist
+  }
+  // Remove undefined/null keys that might cause upsert issues
+  Object.keys(row).forEach(k => { if(row[k] === undefined) delete row[k]; });
   const {error} = await sb.from(table).upsert(row, {onConflict:'id'});
-  if(error) console.warn('_upsert error:', table, id, error.message);
+  if(error) console.warn('_upsert error:', table, id, JSON.stringify(row).slice(0,120), error.message);
 }
 
 function _snap(value, path){
@@ -2393,7 +2517,7 @@ async function loadNoticesCached(uid){
   const cacheKey = `notices_${uid}`;
   let cached = EZCache.get(cacheKey);
   if(!cached){
-    const snap = await fDB.ref('notices').orderByChild('createdAt').limitToLast(20).once('value');
+    const snap = await fDB.ref('notices').orderByChild('created_at').limitToLast(20).once('value');
     cached = snap.val()||{};
     EZCache.set(cacheKey, cached);
   }
@@ -2472,7 +2596,7 @@ async function loadWelcomeStats(){
     if(el1) el1.textContent = userCount.toLocaleString();
     if(el2) el2.textContent = '$'+totalEarned.toFixed(2);
     if(el3) el3.textContent = '🟢 LIVE — '+userCount.toLocaleString()+' Members';
-  } catch(e){ console.log('Stats load error',e); }
+  } catch(e){ /* stats load error — silent in production */ }
 }
 
 function buildWelcome(){
@@ -2964,7 +3088,10 @@ function buildWallet(){
   </div>
   <div class="card">
     <div class="card-hd">💳 ${T('withdrawMethod')}</div>
-    <div class="mg">${methods.map(m=>`<button class="mb2" data-mth="${m}">${CFG.methodEmoji[m]||m}</button>`).join('')}</div>
+    <div class="mg">${methods.map(m=>`<button class="mb2" data-mth="${m}">
+      <span class="method-logo-wrap">${CFG.methodLogo[m]||''}</span>
+      <span class="method-name-txt">${CFG.methodEmoji[m]||m}</span>
+    </button>`).join('')}</div>
     <label class="lbl">${T('withdrawAmt')} (min $${CFG.minUSD})</label>
     <input class="inp" id="wdAmt" type="number" min="${CFG.minUSD}" step="0.01" placeholder="${CFG.minUSD}.00">
     <label class="lbl">${T('withdrawAcc')}</label>
@@ -2983,7 +3110,7 @@ async function loadWithdrawHistory(){
   if(!items.length){ hist.innerHTML=`<div class="empty"><div class="ein">📭</div><div class="etx">${T('noHistory')}</div></div>`; return; }
   hist.innerHTML=items.map(w=>`<div class="arow">
     <div class="arow-l">
-      <div class="fw6 sm">${CFG.methodEmoji[w.method]||w.method} — ${fmt$(w.amount)}</div>
+      <div class="fw6 sm dfc" style="gap:7px">${CFG.methodLogo[w.method]||''}<span>${CFG.methodEmoji[w.method]||w.method}</span> — ${fmt$(w.amount)}</div>
       <div class="xs mu mt8">${fmtD(w.createdAt)} · 
 <span id="acc_${w.id}">${w.account.slice(0,3)}****${w.account.slice(-3)}</span>
 <button onclick="
@@ -3285,16 +3412,17 @@ function buildNotices(){
 
 async function loadNotices(){
   const el=$('#noticesList'); if(!el) return;
-  const snap=await fDB.ref('notices').orderByChild('createdAt').limitToLast(20).once('value');
+  const snap=await fDB.ref('notices').orderByChild('created_at').limitToLast(20).once('value');
   const data=snap.val()||{};
-  const items=Object.entries(data).map(([id,v])=>({...v,id})).sort((a,b)=>b.createdAt-a.createdAt);
+  const items=Object.entries(data).map(([id,v])=>({...v,id}))
+    .sort((a,b)=>(b.created_at||b.createdAt||0)-(a.created_at||a.createdAt||0));
   if(!items.length){ el.innerHTML=`<div class="empty"><div class="ein">📭</div><div class="etx">${T('nun2')}</div></div>`; return; }
   const readMap=S.userData?.readNotices||{};
   el.innerHTML=items.map(n=>`<div class="nc-item" data-notice-id="${n.id}">
     <div class="${readMap[n.id]?'':'nc-dot'}"></div>
     <div style="flex:1">
       <div class="fw6 sm">${n.text.slice(0,60)}…</div>
-      <div class="xs mu mt8">${timeAgo(n.createdAt)}</div>
+      <div class="xs mu mt8">${timeAgo(n.created_at||n.createdAt||Date.now())}</div>
     </div>
     <button class="btn bp bau bsm">${readMap[n.id]?T('close'):T('vn')}</button>
   </div>`).join('');
@@ -3454,7 +3582,7 @@ async function loadMySubmissions(){
   </div>`).join('');
 }
 
-function submitTaskProof(taskId, taskTitle, reward){
+async function submitTaskProof(taskId, taskTitle, reward){
   const uid = S.user?.uid||'unknown';
   const email = S.user?.email||'unknown';
   const subId = 'SUB-'+Date.now();
@@ -3478,6 +3606,7 @@ function submitTaskProof(taskId, taskTitle, reward){
   }
 
   fDB.ref('submissions/'+subId).set({
+    id: subId,    // ← PRIMARY KEY — Supabase এ id field লাগবে
     subId, taskId, taskTitle, reward:parseFloat(reward), uid, email,
     status:'pending', createdAt:Date.now()
   });
@@ -3846,13 +3975,18 @@ async function loadPendingSubmissions(){
 async function approveSubmission(subId, uid, reward){
   await fDB.ref('submissions/'+subId+'/status').set('approved');
   await fDB.ref('users/'+uid+'/usdEarned').transaction(v=>(v||0)+parseFloat(reward));
-  await fDB.ref('stats/totalEarned').transaction(v=>(v||0)+parseFloat(reward));
+  // stats total_earned — direct Supabase (snake_case)
+  const {data:stRow} = await sb.from('stats').select('total_earned').eq('id','stats').maybeSingle();
+  await sb.from('stats').upsert({id:'stats', total_earned:(parseFloat(stRow?.total_earned)||0)+parseFloat(reward)},{onConflict:'id'});
   trackMonthlyEarning(uid, parseFloat(reward)||0);
+  // completedTasks — 4-part path fix: read full user row, update JSONB, write back
+  const {data:ctRow} = await sb.from('users').select('completed_tasks').eq('id',uid).maybeSingle();
+  const ct = ctRow?.completed_tasks || {};
   const subSnap = await fDB.ref('submissions/'+subId).once('value');
-  const taskId = subSnap.val()?.taskId;
+  const taskId = subSnap.val()?.task_id || subSnap.val()?.taskId;
   if(taskId){
-    await fDB.ref(`users/${uid}/completedTasks/${taskId}`).set(true);
-    // Invalidate completed tasks cache for this user
+    ct[taskId] = true;
+    await sb.from('users').update({completed_tasks: ct}).eq('id', uid);
     EZCache.invalidate(`completedTasks_${uid}`);
   }
   showToast('✅ Approved! $'+parseFloat(reward).toFixed(2)+' added','green');
@@ -3942,15 +4076,15 @@ async function loadAdminUsers(c){
 }
    async function loadWithdrawals(c){
   const snap=await fDB.ref('withdrawals').orderByChild('status').equalTo('pending').once('value');
-  const snap2=await fDB.ref('withdrawals').orderByChild('createdAt').limitToLast(20).once('value');
+  const snap2=await fDB.ref('withdrawals').orderByChild('created_at').limitToLast(20).once('value');
   const data=snap2.val()||{};
-  const items=Object.values(data).sort((a,b)=>b.createdAt-a.createdAt);
+  const items=Object.values(data).sort((a,b)=>(b.created_at||b.createdAt||0)-(a.created_at||a.createdAt||0));
   if(!items.length){ c.innerHTML=`<div class="empty"><div class="ein">💸</div><div class="etx">${T('nuw')}</div></div>`; return; }
   c.innerHTML=items.map(w=>`<div class="arow">
     <div class="arow-l">
-      <div class="fw6 sm">${w.userEmail||w.uid} — <span class="cy">${fmt$(w.amount)}</span></div>
+      <div class="fw6 sm">${w.user_email||w.userEmail||w.uid} — <span class="cy">${fmt$(w.amount)}</span></div>
       <div class="xs mu">${CFG.methodEmoji[w.method]||w.method} · ${w.account}</div>
-      <div class="xs mu">${fmtD(w.createdAt)}</div>
+      <div class="xs mu">${fmtD(w.created_at||w.createdAt)}</div>
     </div>
     <div class="arow-bt">
       <span class="bdg ${w.status==='approved'?'bdg2':w.status==='rejected'?'bdr':'bdy'}">${T(w.status==='approved'?'apd':w.status==='rejected'?'rjd':'pd')}</span>
@@ -3978,7 +4112,9 @@ async function loadAdminNotices(c){
   $('#adnPost').onclick=async()=>{
     const txt=$('#adnTxt').value.trim();
     if(!txt){ toast('Write something','w'); return; }
-    const nPush=fDB.ref('notices').push(); await nPush.set({text:txt,createdAt:Date.now(),postedBy:S.user.uid});
+    const nid = crypto.randomUUID ? crypto.randomUUID() : ('n_'+Date.now());
+    const nRef=fDB.ref('notices/'+nid);
+    await nRef.set({id:nid, text:txt, created_at:Date.now(), posted_by:S.user.uid});
     toast('Notice posted!','s');
     $('#adnTxt').value='';
     loadAdminNoticeList();
@@ -3988,12 +4124,13 @@ async function loadAdminNotices(c){
 
 async function loadAdminNoticeList(){
   const l=$('#adnList'); if(!l) return;
-  const snap=await fDB.ref('notices').orderByChild('createdAt').limitToLast(10).once('value');
+  const snap=await fDB.ref('notices').orderByChild('created_at').limitToLast(10).once('value');
   const data=snap.val()||{};
-  const items=Object.entries(data).map(([id,v])=>({...v,id})).sort((a,b)=>b.createdAt-a.createdAt);
+  const items=Object.entries(data).map(([id,v])=>({...v,id}))
+    .sort((a,b)=>(b.created_at||b.createdAt||0)-(a.created_at||a.createdAt||0));
   if(!items.length){ l.innerHTML=`<div class="empty"><div class="ein">📭</div><div class="etx">${T('nun2')}</div></div>`; return; }
   l.innerHTML=items.map(n=>`<div class="arow">
-    <div class="arow-l"><div class="sm">${n.text}</div><div class="xs mu mt8">${fmtD(n.createdAt)}</div></div>
+    <div class="arow-l"><div class="sm">${n.text}</div><div class="xs mu mt8">${fmtD(n.created_at||n.createdAt)}</div></div>
     <button class="btn br bau bsm" data-del-n="${n.id}">✕</button>
   </div>`).join('');
   l.querySelectorAll('[data-del-n]').forEach(btn=>{
@@ -4257,7 +4394,7 @@ fAuth.onAuthStateChanged(async user=>{
     startLiveTicker();
     startActivityToasts();
     // Load real user count for nav from atomic counter
-    fDB.ref('stats/totalUsers').once('value').then(snap=>{
+    fDB.ref('stats/total_users').once('value').then(snap=>{
       S.realUserCount = snap.val()||0;
       const el = document.getElementById('navOnlineCount');
       if(el) el.textContent = S.realUserCount;
@@ -4461,7 +4598,7 @@ async function loadAdminSettings(c){
     const amt=parseFloat($('#testAmt').value)||0;
     if(!uid){ toast('Enter user UID','e'); return; }
     const key=`test_${Date.now()}`;
-    await fDB.ref(`postbacks/${uid}/${key}`).set({amount:amt||S.payoutRates.default||0.30,wallId:wall,offer_id:key,processed:false});
+    await fDB.ref(`postbacks/${uid}/${key}`).set({id:key, uid, wall_id:wall, amount:amt||S.payoutRates.default||0.30, offer_id:key, processed:false});
     toast('Test postback sent! User balance will update.','s');
   };
 }
@@ -4829,12 +4966,12 @@ async function generateMonthlyAwards(month){
     await fDB.ref(`monthlyAwards/${awardId}`).set({
       id: awardId,
       month, uid: u.uid,
-      userName: u.name,
-      userEmail: u.email,
+      user_name: u.name,
+      user_email: u.email,
       rank, earned: u.earned,
       bonus: AWARD_BONUS[rank]||0,
       status: 'pending',
-      createdAt: Date.now(),
+      created_at: Date.now(),
     });
   }
   toast(`✅ ${top3.length} award(s) generated for ${monthDisplayName(month)}`,'s');
@@ -4858,10 +4995,11 @@ async function approveAward(awardId){
   // Notify user (add to notices)
   const noticeId = 'notice_award_'+awardId;
   await fDB.ref(`notices/${noticeId}`).set({
+    id: noticeId,
     text: `🏆 Congratulations! You won Rank #${award.rank} in ${monthDisplayName(award.month)}! +$${award.bonus.toFixed(2)} has been added to your account.`,
-    createdAt: Date.now(),
-    postedBy: S.user?.uid||'admin',
-    targetUid: award.uid,
+    created_at: Date.now(),
+    posted_by: S.user?.uid||'admin',
+    target_uid: award.uid,
   });
   toast(`✅ Award approved! $${award.bonus} sent to ${award.userName}`,'s');
   EZCache.invalidate('monthlyAwards');
@@ -4916,8 +5054,8 @@ async function loadAdminAwards(c){
       ${awards.length ? awards.map(a=>`
         <div class="award-card rank${a.rank} mb8">
           <div class="award-badge">${rankMedal[a.rank-1]||'🏆'}</div>
-          <div style="font-weight:700;font-size:14px">${a.userName}</div>
-          <div style="font-size:12px;color:#64748b;margin:2px 0">${a.userEmail}</div>
+          <div style="font-weight:700;font-size:14px">${a.user_name||a.userName||''}</div>
+          <div style="font-size:12px;color:#64748b;margin:2px 0">${a.user_email||a.userEmail||''}</div>
           <div style="font-size:12px;margin:4px 0">
             📅 ${monthDisplayName(a.month)} · 
             Rank #${a.rank} · 
@@ -4982,16 +5120,15 @@ async function loadUserAwards(uid){
     </div>`).join('');
 }
 
-console.log('%c◆ EarnZone Pro v3 — RSS + Custom Payout + Postback', 'color:#2563eb;font-size:14px;font-weight:700');
+// EarnZone Pro v3 — Production Build
 </script>
 
-<!-- Adsterra Banner Ad (place in site footer or sidebar) -->
-<div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:10;display:none" id="banAd">
-  <script>
-    atOptions={'key':'7ef7430425eb8049f5ca78a4fdb79c59','format':'iframe','height':300,'width':160,'params':{}};
-  </script>
-  <script src="https://www.highperformanceformat.com/7ef7430425eb8049f5ca78a4fdb79c59/invoke.js"></script>
-</div>
+<!-- Adsterra Banner Ad -->
+<script>
+  atOptions={'key':'7ef7430425eb8049f5ca78a4fdb79c59','format':'iframe','height':300,'width':160,'params':{}};
+</script>
+<script src="https://www.highperformanceformat.com/7ef7430425eb8049f5ca78a4fdb79c59/invoke.js"></script>
+<div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:10;display:none" id="banAd"></div>
 
 <!-- Native Banner -->
 <script async="async" data-cfasync="false" src="https://pl29327203.profitablecpmratenetwork.com/71a6c6e0d4a4a4c387b3be64cbb9dc23/invoke.js"></script>
